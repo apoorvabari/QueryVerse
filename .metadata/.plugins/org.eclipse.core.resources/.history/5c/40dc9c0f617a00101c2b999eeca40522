@@ -1,0 +1,16 @@
+package com.example.courses.repository;
+
+import com.example.courses.model.Subject;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface SubjectRepository extends JpaRepository<Subject, Long> {}
+
+
+
+
+
+
+//get subject by course id
+
+
+//sql database for reflection of crud operations 

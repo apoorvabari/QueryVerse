@@ -1,0 +1,5 @@
+package com.example.courses.client;
+
+public interface CourseFeignClient {
+
+}

@@ -1,0 +1,131 @@
+package com.example.courses.service;
+
+import com.example.courses.model.Course;
+import com.example.courses.model.Subject;
+import com.example.courses.repository.CourseRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional; // Import Optional for .flatMap()
+
+@Service
+public class CourseService {
+
+    @Autowired
+    private CourseRepository courseRepository;
+
+    // --- GET Operations ---
+
+    public List<Course> getAllCourses() {
+        return courseRepository.findAll();
+    }
+
+    public Course getCourseById(Long id) {
+        return courseRepository.findById(id).orElse(null);
+    }
+
+    // New method to get a specific subject by its ID within a specific course
+    public Subject getSubjectByCourseAndSubjectId(Long courseId, Long subjectId) {
+        // Find the course first
+        Optional<Course> optionalCourse = courseRepository.findById(courseId);
+
+        // If the course exists, then stream through its subjects to find the one with the matching subjectId
+        return optionalCourse.flatMap(course ->
+                course.getSubjects().stream()
+                      .filter(subject -> subject.getId().equals(subjectId))
+                      .findFirst() // Get the first matching subject (Optional<Subject>)
+        ).orElse(null); // Return the subject or null if not found
+    }
+
+    public Subject getSubjectByCourseAndSubjectId1(Long courseId, Long subjectId) {
+        return courseRepository.findById(courseId)
+                .flatMap(course -> course.getSubjects().stream()
+                        .filter(subject -> subject.getId().equals(subjectId))
+                        .findFirst())
+                .orElse(null);
+    }
+
+    // --- POST Operations ---
+
+    public Course createCourse(Course course) {
+        // Ensure the bidirectional relationship is set before saving
+        if (course.getSubjects() != null) {
+            course.getSubjects().forEach(subject -> subject.setCourse(course));
+        }
+        return courseRepository.save(course);
+    }
+    
+    public Subject addSubjectToCourse(Long courseId, Subject subjectDetails) {
+        Optional<Course> optionalCourse = courseRepository.findById(courseId);
+        if (optionalCourse.isPresent()) {
+            Course course = optionalCourse.get();
+            subjectDetails.setCourse(course);
+            course.getSubjects().add(subjectDetails);
+            courseRepository.save(course);
+            return subjectDetails;
+        }
+        return null;
+    }
+
+    // --- PUT Operations ---
+
+    public Course updateCourse(Long id, Course courseDetails) {
+        return courseRepository.findById(id).map(course -> {
+            course.setName(courseDetails.getName());
+            if (courseDetails.getSubjects() != null) {
+                course.setSubjects(courseDetails.getSubjects());
+            } else {
+                course.setSubjects(null);
+            }
+            return courseRepository.save(course);
+        }).orElse(null);
+    }
+    
+    
+ // Method to add to your CourseService
+ // --- PUT Operations ---
+ public Subject updateSubjectInCourse(Long courseId, Long subjectId, Subject subjectDetails) {
+     return courseRepository.findById(courseId)
+             .flatMap(course -> {
+                 // Find the subject within the course by its ID
+                 return course.getSubjects().stream()
+                         .filter(subject -> subject.getId().equals(subjectId))
+                         .findFirst()
+                         .map(subject -> {
+                             // Update the subject's details
+                             subject.setTitle(subjectDetails.getTitle());
+                             courseRepository.save(course);
+                             return subject;
+                         });
+             })
+             .orElse(null);
+ }
+ 
+    // --- DELETE Operations ---
+
+    public boolean deleteCourse(Long id) {
+        if (courseRepository.existsById(id)) {
+            courseRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+    
+ // --- DELETE Operations ---
+    public boolean deleteSubjectInCourse(Long courseId, Long subjectId) {
+        return courseRepository.findById(courseId)
+                .map(course -> {
+                    // Find the subject within the course
+                    boolean removed = course.getSubjects().removeIf(subject -> subject.getId().equals(subjectId));
+                    if (removed) {
+                        courseRepository.save(course); // Save the course to persist the change
+                        return true;
+                    }
+                    return false;
+                })
+                .orElse(false);
+    }
+    
+    
+}

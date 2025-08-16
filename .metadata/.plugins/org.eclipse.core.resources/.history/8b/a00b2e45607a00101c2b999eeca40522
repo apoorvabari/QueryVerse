@@ -1,0 +1,24 @@
+package com.example.courses;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+public @interface NameServiceClient {
+
+	@SpringBootApplication
+	@NameServiceClient
+	public class WebApplication {
+
+		public static void main(String[] args) {
+			SpringApplication.run(WebApplication.class, args);
+		}
+
+		@org.springframework.cloud.openfeign.FeignClient("name")
+		static interface NameService {
+			@RequestMapping("/")
+			public String getName();
+		}
+	}
+
+}

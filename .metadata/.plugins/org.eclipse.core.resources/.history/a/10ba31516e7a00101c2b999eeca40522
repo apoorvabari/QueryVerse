@@ -1,0 +1,152 @@
+package com.example.courses.controller;
+
+import com.example.courses.model.Course;
+import com.example.courses.model.Subject;
+import com.example.courses.service.CourseService;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.net.URI;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/courses") // Base path for all course-related endpoints
+public class CourseController {
+
+    @Autowired
+    private CourseService courseService;
+
+    // --- GET Operations ---
+
+    // Get all courses
+    // GET /api/courses
+    @GetMapping
+    public ResponseEntity<List<Course>> getAllCourses() {
+        List<Course> courses = courseService.getAllCourses();
+        return ResponseEntity.ok(courses);
+    }
+
+    // Get a single course by its ID
+    // GET /api/courses/{id}
+    @GetMapping("/{id}")
+    public ResponseEntity<Course> getCourseById(@PathVariable Long id) {
+        Course course = courseService.getCourseById(id);
+        if (course != null) {
+            return ResponseEntity.ok(course);
+        }
+        return ResponseEntity.notFound().build(); // 404 Not Found
+    }
+
+    // Get all subjects for a specific course
+    // GET /api/courses/{courseId}/subjects
+    @GetMapping("/{courseId}/subjects")
+    public ResponseEntity<List<Subject>> getSubjectsByCourseId(@PathVariable Long courseId) {
+        Course course = courseService.getCourseById(courseId);
+        if (course != null) {
+            return ResponseEntity.ok(course.getSubjects());
+        }
+        return ResponseEntity.notFound().build(); // 404 Not Found
+    }
+
+    // Get a specific subject by its ID within a specific course
+    // GET /api/courses/{courseId}/subjects/{subjectId}
+    @GetMapping("/{courseId}/subjects/{subjectId}")
+    public ResponseEntity<Subject> getSubjectByCourseAndSubjectId(
+            @PathVariable Long courseId,
+            @PathVariable Long subjectId) {
+        Subject subject = courseService.getSubjectByCourseAndSubjectId(courseId, subjectId);
+        if (subject != null) {
+            return ResponseEntity.ok(subject);
+        }
+        return ResponseEntity.notFound().build(); // 404 Not Found
+    }
+
+    // --- POST Operations ---
+
+    // Create a new course
+    // POST /api/courses
+    @PostMapping
+    public ResponseEntity<Course> createCourse(@Valid @RequestBody Course course) {
+        Course createdCourse = courseService.createCourse(course);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(createdCourse.getId())
+                .toUri();
+        return ResponseEntity.created(location).body(createdCourse); // 201 Created
+    }
+
+    // Add a subject to a course
+    // POST /api/courses/{courseId}/subjects
+    @PostMapping("/{courseId}/subjects")
+    public ResponseEntity<Subject> addSubjectToCourse(
+            @PathVariable Long courseId,
+            @Valid @RequestBody Subject subjectDetails) {
+        Subject newSubject = courseService.addSubjectToCourse(courseId, subjectDetails);
+        if (newSubject != null) {
+            URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                    .path("/{subjectId}")
+                    .buildAndExpand(newSubject.getId())
+                    .toUri();
+            return ResponseEntity.created(location).body(newSubject); // 201 Created
+        }
+        return ResponseEntity.notFound().build(); // 404 Not Found
+    }
+
+    // --- PUT Operations ---
+
+    // Update an existing course
+    // PUT /api/courses/{id}
+    @PutMapping("/{id}")
+    public ResponseEntity<Course> updateCourse(
+            @PathVariable Long id,
+            @Valid @RequestBody Course courseDetails) {
+        Course updatedCourse = courseService.updateCourse(id, courseDetails);
+        if (updatedCourse != null) {
+            return ResponseEntity.ok(updatedCourse); // 200 OK
+        }
+        return ResponseEntity.notFound().build(); // 404 Not Found
+    }
+
+    // Update a subject in a course
+    // PUT /api/courses/{courseId}/subjects/{subjectId}
+    @PutMapping("/{courseId}/subjects/{subjectId}")
+    public ResponseEntity<Subject> updateSubjectInCourse(
+            @PathVariable Long courseId,
+            @PathVariable Long subjectId,
+            @Valid @RequestBody Subject subjectDetails) {
+        Subject updatedSubject = courseService.updateSubjectInCourse(courseId, subjectId, subjectDetails);
+        if (updatedSubject != null) {
+            return ResponseEntity.ok(updatedSubject); // 200 OK
+        }
+        return ResponseEntity.notFound().build(); // 404 Not Found
+    }
+
+    // --- DELETE Operations ---
+
+    // Delete a course by its ID
+    // DELETE /api/courses/{id}
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteCourse(@PathVariable Long id) {
+        boolean deleted = courseService.deleteCourse(id);
+        if (deleted) {
+            return ResponseEntity.noContent().build(); // 204 No Content
+        }
+        return ResponseEntity.notFound().build(); // 404 Not Found
+    }
+
+    // Delete a subject from a course
+    // DELETE /api/courses/{courseId}/subjects/{subjectId}
+    @DeleteMapping("/{courseId}/subjects/{subjectId}")
+    public ResponseEntity<Void> deleteSubjectInCourse(
+            @PathVariable Long courseId,
+            @PathVariable Long subjectId) {
+        boolean deleted = courseService.deleteSubjectInCourse(courseId, subjectId);
+        if (deleted) {
+            return ResponseEntity.noContent().build(); // 204 No Content
+        }
+        return ResponseEntity.notFound().build(); // 404 Not Found
+    }
+}

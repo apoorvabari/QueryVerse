@@ -1,0 +1,75 @@
+package com.example.courses;
+
+import java.util.List;
+
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+
+import com.example.courses.model.Course;
+import com.example.courses.model.Subject;
+import com.example.courses.repository.CourseRepository;
+import com.example.courses.repository.SubjectRepository;
+
+@SpringBootApplication
+public class CourseServiceApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(CourseServiceApplication.class, args);
+	}
+	
+	@Bean
+	CommandLineRunner initData(CourseRepository courseRepo, SubjectRepository subjectRepo) {
+	    return args -> {
+	        //  DBDA Course
+	        Course dbda = new Course();
+	        dbda.setName("DBDA");
+
+	        Subject s1 = new Subject(); s1.setTitle("Data Structures"); s1.setCourse(dbda);
+	        Subject s2 = new Subject(); s2.setTitle("Database Systems"); s2.setCourse(dbda);
+	        Subject s3 = new Subject(); s3.setTitle("Machine Learning"); s3.setCourse(dbda);
+	        Subject s4 = new Subject(); s4.setTitle("Web Technologies"); s4.setCourse(dbda);
+	        Subject s5 = new Subject(); s5.setTitle("Cloud Computing"); s5.setCourse(dbda);
+
+	        dbda.setSubjects(List.of(s1, s2, s3, s4, s5));
+	        courseRepo.save(dbda);
+
+	        //  Embedded Course
+	        Course embedded = new Course();
+	        embedded.setName("Embedded");
+
+	        Subject e1 = new Subject(); e1.setTitle("Microcontrollers"); e1.setCourse(embedded);
+	        Subject e2 = new Subject(); e2.setTitle("RTOS"); e2.setCourse(embedded);
+	        Subject e3 = new Subject(); e3.setTitle("Embedded C"); e3.setCourse(embedded);
+	        Subject e4 = new Subject(); e4.setTitle("IoT Systems"); e4.setCourse(embedded);
+
+	        embedded.setSubjects(List.of(e1, e2, e3, e4));
+	        courseRepo.save(embedded);
+
+	        //  DAC Course
+	        Course dac = new Course();
+	        dac.setName("DAC");
+
+	        Subject d1 = new Subject(); d1.setTitle("Java Programming"); d1.setCourse(dac);
+	        Subject d2 = new Subject(); d2.setTitle("Spring Boot"); d2.setCourse(dac);
+	        Subject d3 = new Subject(); d3.setTitle("Hibernate"); d3.setCourse(dac);
+	        Subject d4 = new Subject(); d4.setTitle("REST APIs"); d4.setCourse(dac);
+
+	        dac.setSubjects(List.of(d1, d2, d3, d4));
+	        courseRepo.save(dac);
+
+	        //  Electronics Course
+	        Course electronics = new Course();
+	        electronics.setName("Electronics");
+
+	        Subject el1 = new Subject(); el1.setTitle("Analog Circuits"); el1.setCourse(electronics);
+	        Subject el2 = new Subject(); el2.setTitle("Digital Electronics"); el2.setCourse(electronics);
+	        Subject el3 = new Subject(); el3.setTitle("VLSI Design"); el3.setCourse(electronics);
+	        Subject el4 = new Subject(); el4.setTitle("Signal Processing"); el4.setCourse(electronics);
+
+	        electronics.setSubjects(List.of(el1, el2, el3, el4));
+	        courseRepo.save(electronics);
+	    };
+	}
+}

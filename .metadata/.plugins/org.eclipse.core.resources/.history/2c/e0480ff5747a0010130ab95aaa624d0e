@@ -1,0 +1,19 @@
+package com.example.courses.client;
+
+import com.example.courses.model.Course;
+import com.example.courses.model.Subject;
+import org.springframework.cloud.openfeign.FeignClient; // Correct import
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
+import java.util.List;
+
+@FeignClient(name = "course-service") // Defines the Feign client for the course service
+public interface CourseFeignClient {
+
+    @GetMapping("/api/courses")
+    List<Course> getAllCourses();
+
+    @GetMapping("/api/courses/{id}")
+    Course getCourseById(@PathVariable("id") Long id);
+}
